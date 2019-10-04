@@ -1,0 +1,47 @@
+version: '2.2'
+services:
+  spark-master:
+    image: bde2020/spark-master:2.4.4-hadoop2.7
+    container_name: spark-master
+    ports:
+      - "8080:8080"
+      - "7077:7077"
+    environment:
+      - HOSTNAME=spark-master
+      - INIT_DAEMON_STEP=setup_spark
+    volumes:
+      - ./target/scala-2.11/spark-fixed-location_2.11-0.0.1.jar:/spark/jars/_spark-fixed-location_2.11-0.0.1.jar/:ro
+      - ./src/main/resources/worker-info.sh:/worker-info.sh
+  spark-worker-group-a:
+    image: bde2020/spark-worker:2.4.4-hadoop2.7
+    scale: 3
+    depends_on:
+      - spark-master
+    environment:
+      - "SPARK_MASTER=spark://spark-master:7077"
+      - "SPARK_TAGS=CPU"
+    volumes:
+      - ./target/scala-2.11/spark-fixed-location_2.11-0.0.1.jar:/spark/jars/_spark-fixed-location_2.11-0.0.1.jar/:ro
+      - ./src/main/resources/worker-info.sh:/worker-info.sh
+  spark-worker-group-b:
+    image: bde2020/spark-worker:2.4.4-hadoop2.7
+    scale: 4
+    depends_on:
+      - spark-master
+    environment:
+      - "SPARK_MASTER=spark://spark-master:7077"
+      - "SPARK_TAGS=GPU"
+    volumes:
+      - ./target/scala-2.11/spark-fixed-location_2.11-0.0.1.jar:/spark/jars/_spark-fixed-location_2.11-0.0.1.jar/:ro
+      - ./src/main/resources/worker-info.sh:/worker-info.sh
+  spark-worker-group-c:
+    image: bde2020/spark-worker:2.4.4-hadoop2.7
+    scale: 5
+    depends_on:
+      - spark-master
+    environment:
+      - "SPARK_MASTER=spark://spark-master:7077"
+      - "SPARK_TAGS=CPU,CPU2,GPU"
+    volumes:
+      - ./target/scala-2.11/spark-fixed-location_2.11-0.0.1.jar:/spark/jars/_spark-fixed-location_2.11-0.0.1.jar/:ro      
+      - ./src/main/resources/worker-info.sh:/worker-info.sh

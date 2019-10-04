@@ -1,0 +1,7 @@
+.metals/
+.scalafmt.conf
+sbt/
+target/
+project/target/
+project/project/
+
